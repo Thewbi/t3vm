@@ -2,7 +2,6 @@ package t3vmimage
 
 import (
 	"bytes"
-	"encoding/hex"
 	"fmt"
 	"log"
 	"os"
@@ -15,6 +14,9 @@ import (
 /// Encoding specification is: http://www.tads.org/t3spec/bincode.htm
 ///
 func Load(file *os.File) {
+	log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+	log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+	log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 	log.Println("Loading image!")
 
 	//reader := bufio.NewReaderSize(file, 999999)
@@ -25,11 +27,11 @@ func Load(file *os.File) {
 	//
 
 	signature := loader.ReadNextBytes(file, 11)
-	fmt.Printf("%s", hex.Dump(signature))
+	//fmt.Printf("%s", hex.Dump(signature))
 
 	// T3-image\015\012\032
 	expected_signature := []byte{'T', '3', '-', 'i', 'm', 'a', 'g', 'e', '\x0d', '\x0a', '\x1a'}
-	fmt.Printf("%s", hex.Dump(expected_signature))
+	//fmt.Printf("%s", hex.Dump(expected_signature))
 
 	if !bytes.Equal(signature, expected_signature) {
 		log.Println("Not a T3 image!")
@@ -41,7 +43,7 @@ func Load(file *os.File) {
 	//
 
 	fileFormatVersionNumber := loader.ReadUInt2FromFile_LE(file)
-	log.Println("T3 image version! ", fileFormatVersionNumber)
+	//log.Println("T3 image version! ", fileFormatVersionNumber)
 
 	if fileFormatVersionNumber != 0x0001 {
 		log.Println("Not a T3 image for the expected version number 0x0001!")
@@ -57,14 +59,16 @@ func Load(file *os.File) {
 	//
 
 	reservedBytes := loader.ReadNextBytes(file, 32)
-	fmt.Printf("%s", hex.Dump(reservedBytes))
+	reservedBytes = reservedBytes
+	//fmt.Printf("%s", hex.Dump(reservedBytes))
 
 	//
 	// image file timestamp (ASCII string in C-Library asctime() formatting without zero termination)
 	//
 
 	imageFileTimestamp := loader.ReadNextBytes(file, 24)
-	fmt.Println(string(imageFileTimestamp))
+	imageFileTimestamp = imageFileTimestamp
+	//fmt.Println(string(imageFileTimestamp))
 
 	//
 	// data blocks
@@ -110,12 +114,22 @@ func Load(file *os.File) {
 		//fmt.Printf("%s", hex.Dump(firstBytes))
 
 		if blockTypeAsString == "ENTP" {
-			fmt.Println("Entry Point Block found!")
+			//fmt.Println("Entry Point Block found!")
 			LoadEntryPointBlock(blockData, int(blockSize), int(blockFlags))
 		} else if blockTypeAsString == "SYMD" {
 			SymbolicNamesBlock(blockData, int(blockSize), int(blockFlags))
+		} else if blockTypeAsString == "FNSD" {
+			FunctionSetDependencyListBlock(blockData, int(blockSize), int(blockFlags))
+		} else if blockTypeAsString == "CPDF" {
+			ConstantPoolDefinitionBlock(blockData, int(blockSize), int(blockFlags))
+		} else if blockTypeAsString == "CPPG" {
+			ConstantPoolPageBlock(blockData, int(blockSize), int(blockFlags))
+		} else if blockTypeAsString == "MCLD" {
+			MetaClassDependencylistBlock(blockData, int(blockSize), int(blockFlags))
+		} else if blockTypeAsString == "OBJS" {
+			StaticObjectsBlock(blockData, int(blockSize), int(blockFlags))
 		} else if blockTypeAsString == "EOF " {
-			fmt.Println("End of File Block found!")
+			//fmt.Println("End of File Block found!")
 			break
 		} else {
 			//fmt.Println("Unknown Block Found: ", blockTypeAsString)

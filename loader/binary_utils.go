@@ -91,7 +91,11 @@ func ReadU4(reader *bufio.Reader) uint32 {
 	return binary.BigEndian.Uint32(bytes)
 }
 
-func ReadU2_Buffer(buffer []byte, offset int) uint16 {
+func ReadU1_Buffer_LE(buffer []byte, offset int) uint8 {
+	return buffer[offset]
+}
+
+func ReadU2_Buffer_LE(buffer []byte, offset int) uint16 {
 	slice := make([]byte, 2)
 
 	// copy is not working for some reason
@@ -104,9 +108,10 @@ func ReadU2_Buffer(buffer []byte, offset int) uint16 {
 	//fmt.Printf("%s", hex.Dump(slice))
 
 	return binary.LittleEndian.Uint16(slice)
+	//return binary.BigEndian.Uint16(slice)
 }
 
-func ReadU4_Buffer(buffer []byte, offset int) uint32 {
+func ReadU4_Buffer_LE(buffer []byte, offset int) uint32 {
 	slice := make([]byte, 4)
 
 	// copy is not working for some reason
@@ -119,6 +124,24 @@ func ReadU4_Buffer(buffer []byte, offset int) uint32 {
 	//fmt.Printf("%s", hex.Dump(slice))
 
 	return binary.LittleEndian.Uint32(slice)
+}
+
+func Read_Buffer_LE(buffer []byte, offset int, size int) []byte {
+	slice := make([]byte, size)
+
+	// copy is not working for some reason
+	//copy(buffer[offset:(offset+2)], slice)
+
+	for i, j := offset, 0; i < offset+size; i, j = i+1, j+1 {
+		slice[j] = buffer[i]
+	}
+
+	//fmt.Printf("%s", hex.Dump(slice))
+
+	//return binary.LittleEndian.Uint16(slice)
+	//return binary.BigEndian.Uint16(slice)
+
+	return slice
 }
 
 func ReadZeroTerminatedString(reader *bufio.Reader) string {
